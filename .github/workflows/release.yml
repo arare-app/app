@@ -52,3 +52,4 @@ jobs:
             release/*/*.rpm
             release/*/*.dmg
             release/*/*.zip
+          retention-days: 15
