@@ -9,7 +9,7 @@ permissions:
 'on':
   push:
     branches:
-      - main
+      - master
     tags-ignore:
       - '**'
     paths-ignore:
@@ -43,8 +43,8 @@ jobs:
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
             build: |-
               set -e &&
-              yarn build --target x86_64-unknown-linux-gnu &&
-              strip *.node
+              yarn workspace @bc-electron/core build --target x86_64-unknown-linux-gnu &&
+              strip packages/core/*.node
           - host: macos-latest
             target: aarch64-apple-darwin
             build: |
@@ -54,6 +54,9 @@ jobs:
     runs-on: ${{ matrix.settings.host }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.REPOSITORY }}
+          token: ${{ secrets.PAT }}
       - name: Setup node
         uses: actions/setup-node@v3
         if: ${{ !matrix.settings.docker }}
@@ -74,8 +77,8 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            .cargo-cache
-            target/
+            packages/core/.cargo-cache
+            packages/core/target/
           key: ${{ matrix.settings.target }}-cargo-${{ matrix.settings.host }}
       - uses: goto-bus-stop/setup-zig@v2
         if: ${{ matrix.settings.target == 'armv7-unknown-linux-gnueabihf' }}
@@ -91,6 +94,7 @@ jobs:
         shell: bash
       - name: Install dependencies
         run: yarn install
+        working-directory: .
       - name: Setup node x86
         uses: actions/setup-node@v3
         if: matrix.settings.target == 'i686-pc-windows-msvc'
@@ -114,7 +118,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: bindings-${{ matrix.settings.target }}
-          path: ${{ env.APP_NAME }}.*.node
+          path: packages/core/${{ env.APP_NAME }}.*.node
           if-no-files-found: error
   test-macOS-windows-binding:
     name: Test bindings on ${{ matrix.settings.target }} - node@${{ matrix.node }}
@@ -132,9 +136,13 @@ jobs:
           - '14'
           - '16'
           - '18'
+          - '20'
     runs-on: ${{ matrix.settings.host }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.REPOSITORY }}
+          token: ${{ secrets.PAT }}
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -147,7 +155,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: bindings-${{ matrix.settings.target }}
-          path: .
+          path: ./packages/core/artifacts/bindings-${{ matrix.settings.target }}
+      - name: Move artifacts
+        run: yarn artifacts
       - name: List packages
         run: ls -R .
         shell: bash
@@ -164,9 +174,13 @@ jobs:
           - '14'
           - '16'
           - '18'
+          - '20'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.REPOSITORY }}
+          token: ${{ secrets.PAT }}
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -179,12 +193,15 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: bindings-x86_64-unknown-linux-gnu
-          path: .
+          path: ./packages/core/artifacts/bindings-x86_64-unknown-linux-gnu
+      - name: Move artifacts
+        run: yarn artifacts
       - name: List packages
         run: ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim yarn test
+        working-directory: .
+        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim yarn workspace @bc-electron/core test
   # publish:
   #   name: Publish
   #   runs-on: ubuntu-latest
@@ -193,6 +210,9 @@ jobs:
   #     - test-linux-x64-gnu-binding
   #   steps:
   #     - uses: actions/checkout@v3
+  #   with:
+  #     repository: ${{ secrets.REPOSITORY }}
+  #     token: ${{ secrets.PAT }}
   #     - name: Setup node
   #       uses: actions/setup-node@v3
   #       with:
