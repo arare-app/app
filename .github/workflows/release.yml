@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: MaikoTan/BondageClubElectron
+          repository: ${{ secrets.REPOSITORY }}
           token: ${{ secrets.PAT }}
 
       - name: Setup Node.js
