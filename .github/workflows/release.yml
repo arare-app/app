@@ -4,12 +4,14 @@ on:
   push:
     branches:
       - master
+    tags:
+      - v*
   workflow_call:
   workflow_dispatch:
 
 
 jobs:
-  release:
+  build:
     strategy:
       fail-fast: false
       matrix:
@@ -29,14 +31,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          repository: ${{ secrets.REPOSITORY }}
-          token: ${{ secrets.PAT }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: '18.16.1'
 
       - name: Install dependencies
         run: yarn install
@@ -61,3 +60,29 @@ jobs:
             release/*/*.dmg
             release/*/*.zip
           retention-days: 15
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: release
+
+      - name: Display Artifacts
+        run: ls -l release
+
+      - name: Extract Tag
+        id: extract_tag
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+
+      - uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: true
+          title: Release ${{ steps.extract_tag.outputs.tag }}
+          files: |
+            release/**/*

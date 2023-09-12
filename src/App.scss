@@ -1,0 +1,22 @@
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+.app {
+  width: 100%;
+  height: 100%;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#icon-settings {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  font-size: 30px;
+}

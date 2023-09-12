@@ -1,0 +1,40 @@
+root: true
+extends:
+  - eslint:recommended
+  - plugin:react/recommended
+  - 'plugin:@typescript-eslint/recommended'
+
+plugins:
+  - prettier
+  - react
+  - '@typescript-eslint'
+
+parser: '@typescript-eslint/parser'
+
+settings:
+  react:
+    version: 'detect'
+
+ignorePatterns:
+  - node_modules/
+  - .next/
+  - dist/
+  - dist-electron/
+  - public/
+  - release/
+  - .eslintrc.yml
+  # Bondage Club stuff
+  - resources/
+
+rules:
+  prettier/prettier: error
+
+  '@typescript-eslint/no-unused-vars':
+    - error
+    - argsIgnorePattern: '^_'
+
+overrides:
+  - files: '**/*.tsx'
+    rules:
+      # Vite would handle this.
+      react/react-in-jsx-scope: off

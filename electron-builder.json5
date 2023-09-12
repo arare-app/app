@@ -1,0 +1,40 @@
+/**
+ * @see https://www.electron.build/configuration/configuration
+ */
+{
+  appId: 'io.maiko.arare',
+  asar: true,
+  directories: {
+    output: 'release/${version}',
+  },
+  files: ['dist-electron', 'dist'],
+  linux: {
+    target: ['AppImage', 'deb', 'rpm'],
+    artifactName: '${productName}_${version}.${ext}',
+    category: 'Game',
+  },
+  mac: {
+    artifactName: '${productName}_${version}.${ext}',
+    target: ['dmg', 'zip'],
+  },
+  win: {
+    target: [
+      {
+        target: 'nsis',
+        arch: ['x64'],
+      },
+    ],
+    artifactName: '${productName}_${version}.${ext}',
+  },
+  nsis: {
+    oneClick: false,
+    perMachine: false,
+    allowToChangeInstallationDirectory: true,
+    deleteAppDataOnUninstall: false,
+  },
+  publish: {
+    provider: 'generic',
+    channel: 'latest',
+    url: 'https://github.com/arare-app/app/releases/download/${version}',
+  },
+}
