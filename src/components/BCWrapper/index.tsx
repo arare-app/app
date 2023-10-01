@@ -31,7 +31,7 @@ function BondageClubWrapper(): JSX.Element {
                 nameEl.value = '${username}'
                 passwordEl.value = '${password}'
               }
-  
+
               while (!ServerIsConnected) {
                 await new Promise((resolve) => setTimeout(resolve, 100))
               }
@@ -40,6 +40,22 @@ function BondageClubWrapper(): JSX.Element {
           `)
         }
       }
+
+      // Inject Plugins
+      webview.executeJavaScript(`
+        (async () => {
+          setTimeout(() => {
+            if (window.BCX_Loaded === undefined) {
+              const n = document.createElement("script");
+              n.setAttribute("language", "JavaScript");
+              n.setAttribute("crossorigin", "anonymous");
+              n.setAttribute("src", "https://jomshir98.github.io/bondage-club-extended/bcx.js?_=" + Date.now());
+              n.onload = () => n.remove();
+              document.head.appendChild(n);
+            }
+          }, 2000);
+        })()
+      `)
     }
 
     webview.addEventListener('dom-ready', onDomReady)
