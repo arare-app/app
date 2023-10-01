@@ -1,6 +1,5 @@
+import { credentials } from '@arare/core'
 import { ipcMain } from 'electron'
-import { getPassword, setPassword } from 'keytar'
-
 import Store from 'electron-store'
 
 export function registerHandlers() {
@@ -16,12 +15,12 @@ export function registerHandlers() {
   ipcMain.handle('saveSettings', (_event, arg) => {
     store.set('autoLogin', arg.autologin)
     store.set('username', arg.username)
-    setPassword('bondage-club-electron', arg.username, arg.password)
+    credentials.save('bondage-club-electron', arg.username, arg.password)
     return true
   })
 
   ipcMain.handle('loadCredentials', async (_event, arg) => {
-    const password = await getPassword('bondage-club-electron', arg.username)
+    const password = await credentials.load('bondage-club-electron', arg.username)
     return {
       username: arg.username,
       password,
