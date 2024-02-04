@@ -49,7 +49,8 @@ export function createProxy() {
         }
       }
     }
-
+    // bypassCustomProtocolHandlers makes the current request bypass this handler
+    // so it would access the correct address.
     return net.fetch(req, { bypassCustomProtocolHandlers: true })
   })
 }
