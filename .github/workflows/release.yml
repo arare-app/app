@@ -37,6 +37,9 @@ jobs:
         with:
           node-version: '18.16.1'
 
+      - name: Set Yarn Version to Berry
+        run: yarn set version berry
+
       - name: Install dependencies
         run: yarn install
 
