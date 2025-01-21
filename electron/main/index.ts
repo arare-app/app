@@ -6,6 +6,8 @@ import { registerHandlers } from './settings'
 import { release } from 'node:os'
 import { update } from './update'
 
+const __dirname = import.meta.dirname
+
 // The built directory structure
 //
 // ├─┬ dist-electron

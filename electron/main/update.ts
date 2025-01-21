@@ -1,5 +1,9 @@
 import { app, ipcMain } from 'electron'
-import { type ProgressInfo, type UpdateDownloadedEvent, autoUpdater } from 'electron-updater'
+import electronUpdater from 'electron-updater'
+
+import type { ProgressInfo, UpdateDownloadedEvent } from 'electron-updater'
+
+const { autoUpdater } = electronUpdater
 
 export function update(win: Electron.BrowserWindow) {
   // When set to false, the update download will be triggered through the API
