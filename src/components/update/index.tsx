@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import Modal from '@/components/update/Modal'
 import Progress from '@/components/update/Progress'
-import type { ProgressInfo } from 'electron-updater'
+import type { ProgressInfo, UpdateCheckResult } from 'electron-updater'
 import { ipcRenderer } from 'electron'
 import styles from './update.module.scss'
 
@@ -25,10 +25,7 @@ const Update = () => {
 
   const checkUpdate = async () => {
     setChecking(true)
-    /**
-     * @type {import('electron-updater').UpdateCheckResult | null | { message: string, error: Error }}
-     */
-    const result = await ipcRenderer.invoke('check-update')
+    const result: UpdateCheckResult | null | { message: string; error: Error } = await ipcRenderer.invoke('check-update')
     setProgressInfo({ percent: 0 })
     setChecking(false)
     setModalOpen(true)

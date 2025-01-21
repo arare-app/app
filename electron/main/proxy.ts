@@ -4,6 +4,8 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 
+import { fileTypeFromBuffer } from 'file-type'
+
 const RESOURCES_DIR = path.resolve(app.getAppPath(), 'resources')
 const RESOURCES_REGEX = /^https:\/\/www\.bondageprojects\.elementfx\.com\/R\d+\/BondageClub\/(Assets|Audio|Backgrounds|Fonts|Icons)\/(.*)$/
 
@@ -15,8 +17,9 @@ export function createProxy() {
         const urlpath = m[2]
         const file = path.resolve(RESOURCES_DIR, m[1], urlpath)
         if (existsSync(file)) {
-          const mimeType = (await (await import('file-type')).fileTypeFromFile(file))?.mime ?? 'application/octet-stream'
-          const response = new Response(await readFile(file))
+          const fileBuffer = await readFile(file)
+          const mimeType = (await fileTypeFromBuffer(fileBuffer))?.mime ?? 'application/octet-stream'
+          const response = new Response(fileBuffer)
           response.headers.set('Content-Type', mimeType)
           response.headers.set('Access-Control-Allow-Origin', '*')
           response.headers.set('Access-Control-Allow-Methods', 'GET')
