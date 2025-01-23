@@ -44,3 +44,5 @@ bc-env.ts
 
 # Test screenshots
 /e2e/screenshots
+
+.vite/
