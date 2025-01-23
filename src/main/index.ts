@@ -4,7 +4,6 @@ import { createProxy } from './proxy'
 import { join } from 'node:path'
 import { registerHandlers } from './settings'
 import { release } from 'node:os'
-import { update } from './update'
 
 const __dirname = import.meta.dirname
 
@@ -80,9 +79,6 @@ async function createWindow() {
     if (url.startsWith('https:')) shell.openExternal(url)
     return { action: 'deny' }
   })
-
-  // Apply electron-updater
-  update(win)
 
   // Create a proxy
   createProxy()
