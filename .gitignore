@@ -46,3 +46,4 @@ bc-env.ts
 /e2e/screenshots
 
 .vite/
+out/
