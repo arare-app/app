@@ -2,7 +2,7 @@ import { app, net, protocol } from 'electron'
 
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 
 import { fileTypeFromBuffer } from 'file-type'
 
@@ -17,6 +17,34 @@ export function createProxy() {
         const urlpath = m[2]
         const file = path.resolve(RESOURCES_DIR, m[1], urlpath)
         if (existsSync(file)) {
+          const fileStat = await stat(file)
+
+          // If the file is older than 1 day, we will check if the file is updated
+          // and download the new one if it is.
+          if (Date.now() - fileStat.mtimeMs > 86400000) {
+            const response = await net.fetch(req, { method: 'HEAD', bypassCustomProtocolHandlers: true })
+            if (response.ok) {
+              const lastModified = response.headers.get('Last-Modified')
+              if (lastModified) {
+                const remoteDate = new Date(lastModified).getTime()
+                if (remoteDate > fileStat.mtimeMs) {
+                  console.log('Downloading new file:', file)
+                  const response = await net.fetch(req, { bypassCustomProtocolHandlers: true })
+                  if (response.ok) {
+                    const buffer = await response.arrayBuffer()
+                    await writeFile(file, Buffer.from(buffer))
+                    const newResponse = new Response(Buffer.from(buffer))
+                    response.headers.forEach((value, key) => {
+                      newResponse.headers.set(key, value)
+                    })
+                    return newResponse
+                  }
+                }
+              }
+            }
+          }
+
+          // Otherwise, we will just return the file
           const fileBuffer = await readFile(file)
           const mimeType = (await fileTypeFromBuffer(fileBuffer))?.mime ?? 'application/octet-stream'
           const response = new Response(fileBuffer)
